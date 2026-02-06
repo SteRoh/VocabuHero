@@ -1,0 +1,103 @@
+Front,Back,Note
+acceptance,Akzeptanz,need
+affection,Zuneigung,need
+appreciation,Wertschätzung,need
+autonomy,Autonomie,need
+celebration,Feier,need
+clarity,Klarheit,need
+community,Gemeinschaft,need
+companionship,Kameradschaft,need
+competence,Kompetenz,need
+connection,Verbundenheit,need
+consideration,Rücksichtnahme,need
+consistency,Beständigkeit,need
+contribution,Beitrag,need
+cooperation,Zusammenarbeit,need
+creativity,Kreativität,need
+ease,Leichtigkeit,need
+empathy,Einfühlungsvermögen,need
+equality,Gleichheit,need
+fairness,Gerechtigkeit,need
+freedom,Freiheit,need
+harmony,Harmonie,need
+honesty,Ehrlichkeit,need
+hope,Hoffnung,need
+integrity,Integrität,need
+interdependence,Interdependenz,need
+intimacy,Intimität,need
+love,Liebe,need
+meaning,Sinn,need
+mutuality,Gegenseitigkeit,need
+nurturing,Fürsorge,need
+order,Ordnung,need
+peace,Frieden,need
+physical wellbeing,körperliches Wohlbefinden,need
+play,Spiel,need
+purpose,Zweck,need
+respect,Respekt,need
+rest,Ruhe,need
+safety,Sicherheit,need
+self-expression,Selbstausdruck,need
+support,Unterstützung,need
+to be seen,gesehen werden,need
+to be heard,gehört werden,need
+trust,Vertrauen,need
+understanding,Verständnis,need
+warmth,Wärme,need
+welcome,Willkommen,need
+absorbed,vertieft,feeling met
+affectionate,zärtlich,feeling met
+alive,lebendig,feeling met
+amazed,erstaunt,feeling met
+amused,amüsiert,feeling met
+calm,ruhig,feeling met
+cheerful,fröhlich,feeling met
+comfortable,wohl,feeling met
+confident,selbstbewusst,feeling met
+content,zufrieden,feeling met
+delighted,entzückt,feeling met
+eager,eifrig,feeling met
+energized,energiegeladen,feeling met
+excited,aufgeregt,feeling met
+fulfilled,erfüllt,feeling met
+grateful,dankbar,feeling met
+hopeful,hoffnungsvoll,feeling met
+inspired,inspiriert,feeling met
+joyful,freudig,feeling met
+peaceful,friedlich,feeling met
+pleased,erfreut,feeling met
+relieved,erleichtert,feeling met
+relaxed,entspannt,feeling met
+safe,sicher,feeling met
+satisfied,zufrieden,feeling met
+tender,zart,feeling met
+thankful,dankbar,feeling met
+touched,berührt,feeling met
+trusting,vertrauensvoll,feeling met
+warm,warm,feeling met
+afraid,ängstlich,feeling unmet
+agitated,aufgebracht,feeling unmet
+angry,wütend,feeling unmet
+annoyed,verärgert,feeling unmet
+anxious,ängstlich,feeling unmet
+ashamed,beschämt,feeling unmet
+confused,verwirrt,feeling unmet
+disappointed,enttäuscht,feeling unmet
+discouraged,mutlos,feeling unmet
+exhausted,erschöpft,feeling unmet
+frustrated,frustriert,feeling unmet
+guilty,schuldig,feeling unmet
+helpless,hilflos,feeling unmet
+hurt,verletzt,feeling unmet
+impatient,ungeduldig,feeling unmet
+irritated,gereizt,feeling unmet
+lonely,einsam,feeling unmet
+nervous,nervös,feeling unmet
+overwhelmed,überwältigt,feeling unmet
+sad,traurig,feeling unmet
+scared,verängstigt,feeling unmet
+tense,angespannt,feeling unmet
+tired,müde,feeling unmet
+uneasy,unbehaglich,feeling unmet
+upset,verstört,feeling unmet
+worried,besorgt,feeling unmet

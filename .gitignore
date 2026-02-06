@@ -1,0 +1,43 @@
+# Build outputs
+/build
+/app/build
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# Gradle
+.gradle
+!gradle/wrapper/gradle-wrapper.jar
+
+# Local config (SDK path, etc.)
+local.properties
+/local.properties
+
+# IDE (IntelliJ / Android Studio)
+*.iml
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+/.idea/shelf
+out
+
+# Android
+/captures
+.externalNativeBuild
+.cxx
+*.hprof
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs and temp
+*.log
+*.tmp
+*.temp
+*.swp
+*~
