@@ -147,16 +147,36 @@ class CardRepository(
         cardDao.resetProgressInDeck(deckId)
     }
 
-    /** Ensures the three built-in decks exist and loads their CSV from assets if newly created. */
+    /** Ensures the built-in decks exist and loads their CSV from assets if newly created. */
     suspend fun ensureBuiltInDecks(context: Context) = withContext(Dispatchers.IO) {
         val builtIns = listOf(
-            Triple("Italian – German", "Italian", "German"),
-            Triple("English – German 1000", "English", "German"),
+            Triple("English – German BASIC", "English", "German"),
+            Triple("English – German ADVANCED", "English", "German"),
+            Triple("English – German EXPERT", "English", "German"),
+            Triple("Italian – German BASIC", "Italian", "German"),
+            Triple("Italian – German ADVANCED", "Italian", "German"),
+            Triple("Italian – German EXPERT", "Italian", "German"),
+            Triple("French – German BASIC", "French", "German"),
+            Triple("French – German ADVANCED", "French", "German"),
+            Triple("French – German EXPERT", "French", "German"),
+            Triple("Spanish – German BASIC", "Spanish", "German"),
+            Triple("Spanish – German ADVANCED", "Spanish", "German"),
+            Triple("Spanish – German EXPERT", "Spanish", "German"),
             Triple("GFK", "English", "German")
         )
         val assetNames = mapOf(
-            "Italian – German" to "italian_german_1000.csv",
-            "English – German 1000" to "english_german_1000.csv",
+            "English – German BASIC" to "english_german_basic.csv",
+            "English – German ADVANCED" to "english_german_advanced.csv",
+            "English – German EXPERT" to "english_german_expert.csv",
+            "Italian – German BASIC" to "italian_german_basic.csv",
+            "Italian – German ADVANCED" to "italian_german_advanced.csv",
+            "Italian – German EXPERT" to "italian_german_expert.csv",
+            "French – German BASIC" to "french_german_basic.csv",
+            "French – German ADVANCED" to "french_german_advanced.csv",
+            "French – German EXPERT" to "french_german_expert.csv",
+            "Spanish – German BASIC" to "spanish_german_basic.csv",
+            "Spanish – German ADVANCED" to "spanish_german_advanced.csv",
+            "Spanish – German EXPERT" to "spanish_german_expert.csv",
             "GFK" to "gfk.csv"
         )
         val existing = deckDao.getAllOnce()

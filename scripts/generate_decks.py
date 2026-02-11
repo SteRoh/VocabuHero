@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
-"""Generate italian_german_1000.csv and english_german_1000.csv with 1000 words each."""
+"""Generate vocabulary deck CSVs: BASIC (1-1000), ADVANCED (1001-2000), EXPERT (2001-5000) for EN/IT/FR/ES to German.
+Non-overlapping: each level contains only its own words."""
 import os
+import urllib.request
+import ssl
 
-# Italian-German: extend starter (130) with 870 common pairs (most frequent / useful)
-# Format: (italian, german)
+HEADER = "Front,Back,Note"
+YACLE_URL = "https://raw.githubusercontent.com/codogogo/xling-eval/master/bli_datasets/en-de/yacle.train.freq.5k.en-de.tsv"
+
+# Italian-German: common pairs (most frequent / useful). Format: (italian, german)
 EXTRA_IT_DE = [
     ("anno", "Jahr"), ("vita", "Leben"), ("mano", "Hand"), ("parte", "Teil"), ("occhio", "Auge"),
     ("giorno", "Tag"), ("mondo", "Welt"), ("notte", "Nacht"), ("testa", "Kopf"), ("ora", "Stunde"),
@@ -89,7 +94,7 @@ EXTRA_IT_DE = [
     ("diritto", "Recht"), ("dovere", "Pflicht"), ("responsabilità", "Verantwortung"),
 ]
 
-# English-German: 1000 common words (same structure)
+# English-German fallback (used if yacle download fails)
 EN_DE = [
     ("the", "der/die/das"), ("be", "sein"), ("to", "zu"), ("of", "von"), ("and", "und"),
     ("a", "ein/eine"), ("in", "in"), ("that", "dass"), ("have", "haben"), ("I", "ich"),
@@ -114,16 +119,11 @@ EN_DE = [
     ("even", "sogar"), ("new", "neu"), ("want", "wollen"), ("because", "weil"),
     ("any", "irgendein"), ("these", "diese"), ("give", "geben"), ("day", "Tag"),
     ("most", "meiste"), ("us", "uns"), ("is", "ist"), ("are", "sind"), ("was", "war"),
-    ("were", "waren"), ("been", "gewesen"), ("being", "seiend"), ("have", "haben"),
-    ("has", "hat"), ("had", "hatte"), ("having", "habend"), ("do", "tun"), ("does", "tut"),
-    ("did", "tat"), ("doing", "tun"), ("will", "werden"), ("would", "würde"),
-    ("could", "könnte"), ("should", "sollte"), ("may", "könnte"), ("might", "könnte"),
-    ("must", "muss"), ("shall", "soll"), ("need", "brauchen"), ("dare", "wagen"),
-    ("ought", "sollte"), ("used", "benutzt"), ("life", "Leben"), ("man", "Mann"),
-    ("woman", "Frau"), ("child", "Kind"), ("world", "Welt"), ("house", "Haus"),
-    ("place", "Ort"), ("thing", "Ding"), ("hand", "Hand"), ("eye", "Auge"),
-    ("head", "Kopf"), ("part", "Teil"), ("number", "Nummer"), ("name", "Name"),
-    ("father", "Vater"), ("mother", "Mutter"), ("son", "Sohn"), ("daughter", "Tochter"),
+    ("were", "waren"), ("been", "gewesen"), ("being", "seiend"), ("has", "hat"), ("had", "hatte"),
+    ("does", "tut"), ("did", "tat"), ("life", "Leben"), ("man", "Mann"), ("woman", "Frau"),
+    ("child", "Kind"), ("world", "Welt"), ("house", "Haus"), ("place", "Ort"), ("thing", "Ding"),
+    ("hand", "Hand"), ("eye", "Auge"), ("head", "Kopf"), ("part", "Teil"), ("number", "Nummer"),
+    ("name", "Name"), ("father", "Vater"), ("mother", "Mutter"), ("son", "Sohn"), ("daughter", "Tochter"),
     ("brother", "Bruder"), ("sister", "Schwester"), ("friend", "Freund"),
     ("water", "Wasser"), ("food", "Essen"), ("bread", "Brot"), ("meat", "Fleisch"),
     ("fish", "Fisch"), ("milk", "Milch"), ("coffee", "Kaffee"), ("tea", "Tee"),
@@ -149,7 +149,7 @@ EN_DE = [
     ("rich", "reich"), ("poor", "arm"), ("present", "anwesend"), ("absent", "abwesend"),
     ("today", "heute"), ("tomorrow", "morgen"), ("yesterday", "gestern"),
     ("morning", "Morgen"), ("afternoon", "Nachmittag"), ("evening", "Abend"),
-    ("night", "Nacht"), ("week", "Woche"), ("month", "Monat"), ("year", "Jahr"),
+    ("night", "Nacht"), ("week", "Woche"), ("month", "Monat"),
     ("Monday", "Montag"), ("Tuesday", "Dienstag"), ("Wednesday", "Mittwoch"),
     ("Thursday", "Donnerstag"), ("Friday", "Freitag"), ("Saturday", "Samstag"),
     ("Sunday", "Sonntag"), ("January", "Januar"), ("February", "Februar"),
@@ -161,47 +161,161 @@ EN_DE = [
     ("one", "eins"), ("two", "zwei"), ("three", "drei"), ("four", "vier"), ("five", "fünf"),
     ("six", "sechs"), ("seven", "sieben"), ("eight", "acht"), ("nine", "neun"), ("ten", "zehn"),
     ("hundred", "hundert"), ("thousand", "tausend"), ("first", "erste"), ("second", "zweite"),
-    ("here", "hier"), ("there", "dort"), ("where", "wo"), ("when", "wann"),
-    ("why", "warum"), ("how", "wie"), ("what", "was"), ("who", "wer"),
+    ("here", "hier"), ("where", "wo"), ("why", "warum"), ("how", "wie"), ("what", "was"), ("who", "wer"),
     ("yes", "ja"), ("no", "nein"), ("please", "bitte"), ("thanks", "danke"),
     ("sorry", "Entschuldigung"), ("hello", "hallo"), ("goodbye", "auf Wiedersehen"),
 ]
 
-def escape(s):
-    return '"' + str(s).replace('"', '""') + '"'
+# French-German: common pairs. Format: (french, german)
+FR_DE = [
+    ("le", "der"), ("la", "die"), ("les", "die"), ("un", "ein"), ("une", "eine"), ("et", "und"),
+    ("être", "sein"), ("avoir", "haben"), ("de", "von"), ("à", "zu"), ("en", "in"),
+    ("que", "dass"), ("qui", "wer"), ("ce", "dieser"), ("dans", "in"), ("du", "von"),
+    ("je", "ich"), ("il", "er"), ("elle", "sie"), ("on", "man"), ("nous", "wir"),
+    ("vous", "Sie"), ("ils", "sie"), ("leur", "ihr"), ("pas", "nicht"), ("plus", "mehr"),
+    ("tout", "alles"), ("aussi", "auch"), ("bien", "gut"), ("très", "sehr"), ("donc", "also"),
+    ("comme", "wie"), ("mais", "aber"), ("ou", "oder"), ("si", "wenn"), ("par", "durch"),
+    ("pour", "für"), ("avec", "mit"), ("sans", "ohne"), ("sur", "auf"), ("sous", "unter"),
+    ("avant", "vorher"), ("après", "nach"), ("entre", "zwischen"), ("chez", "bei"),
+    ("homme", "Mann"), ("femme", "Frau"), ("enfant", "Kind"), ("père", "Vater"), ("mère", "Mutter"),
+    ("frère", "Bruder"), ("sœur", "Schwester"), ("ami", "Freund"), ("vie", "Leben"),
+    ("jour", "Tag"), ("an", "Jahr"), ("temps", "Zeit"), ("heure", "Stunde"), ("nuit", "Nacht"),
+    ("maison", "Haus"), ("ville", "Stadt"), ("pays", "Land"), ("monde", "Welt"),
+    ("travail", "Arbeit"), ("argent", "Geld"), ("eau", "Wasser"), ("pain", "Brot"),
+    ("café", "Kaffee"), ("lait", "Milch"), ("vin", "Wein"), ("bière", "Bier"),
+    ("chose", "Ding"), ("part", "Teil"), ("nom", "Name"), ("numéro", "Nummer"),
+    ("main", "Hand"), ("œil", "Auge"), ("tête", "Kopf"), ("porte", "Tür"),
+    ("fenêtre", "Fenster"), ("table", "Tisch"), ("chaise", "Stuhl"), ("lit", "Bett"),
+    ("cuisine", "Küche"), ("salle", "Zimmer"), ("rue", "Straße"), ("école", "Schule"),
+    ("bureau", "Büro"), ("voiture", "Auto"), ("train", "Zug"), ("avion", "Flugzeug"),
+    ("aller", "gehen"), ("venir", "kommen"), ("faire", "machen"), ("dire", "sagen"),
+    ("voir", "sehen"), ("savoir", "wissen"), ("pouvoir", "können"), ("vouloir", "wollen"),
+    ("prendre", "nehmen"), ("donner", "geben"), ("mettre", "stellen"), ("trouver", "finden"),
+    ("grand", "groß"), ("petit", "klein"), ("nouveau", "neu"), ("bon", "gut"), ("mauvais", "schlecht"),
+    ("beau", "schön"), ("vieux", "alt"), ("jeune", "jung"), ("long", "lang"), ("court", "kurz"),
+    ("haut", "hoch"), ("bas", "niedrig"), ("fort", "stark"), ("faible", "schwach"),
+    ("facile", "einfach"), ("difficile", "schwer"), ("possible", "möglich"),
+    ("important", "wichtig"), ("rouge", "rot"), ("bleu", "blau"), ("vert", "grün"),
+    ("jaune", "gelb"), ("blanc", "weiß"), ("noir", "schwarz"), ("gris", "grau"),
+    ("un", "eins"), ("deux", "zwei"), ("trois", "drei"), ("quatre", "vier"), ("cinq", "fünf"),
+    ("six", "sechs"), ("sept", "sieben"), ("huit", "acht"), ("neuf", "neun"), ("dix", "zehn"),
+    ("lundi", "Montag"), ("mardi", "Dienstag"), ("mercredi", "Mittwoch"),
+    ("janvier", "Januar"), ("février", "Februar"), ("mars", "März"), ("avril", "April"),
+    ("mai", "Mai"), ("juin", "Juni"), ("juillet", "Juli"), ("août", "August"),
+    ("septembre", "September"), ("octobre", "Oktober"), ("novembre", "November"), ("décembre", "Dezember"),
+    ("merci", "danke"), ("s'il vous plaît", "bitte"), ("bonjour", "Guten Tag"),
+    ("au revoir", "auf Wiedersehen"), ("oui", "ja"), ("non", "nein"),
+]
+
+# Spanish-German: common pairs. Format: (spanish, german)
+ES_DE = [
+    ("el", "der"), ("la", "die"), ("los", "die"), ("las", "die"), ("un", "ein"), ("una", "eine"),
+    ("y", "und"), ("ser", "sein"), ("estar", "sein"), ("tener", "haben"), ("hacer", "machen"),
+    ("de", "von"), ("a", "zu"), ("en", "in"), ("que", "dass"), ("con", "mit"), ("por", "durch"),
+    ("para", "für"), ("sin", "ohne"), ("sobre", "über"), ("entre", "zwischen"),
+    ("yo", "ich"), ("él", "er"), ("ella", "sie"), ("nosotros", "wir"), ("vosotros", "ihr"),
+    ("ellos", "sie"), ("su", "sein"), ("tu", "dein"), ("mi", "mein"), ("no", "nicht"),
+    ("más", "mehr"), ("muy", "sehr"), ("bien", "gut"), ("también", "auch"), ("como", "wie"),
+    ("pero", "aber"), ("o", "oder"), ("si", "wenn"), ("hombre", "Mann"), ("mujer", "Frau"),
+    ("niño", "Kind"), ("padre", "Vater"), ("madre", "Mutter"), ("hermano", "Bruder"),
+    ("hermana", "Schwester"), ("amigo", "Freund"), ("vida", "Leben"), ("día", "Tag"),
+    ("año", "Jahr"), ("tiempo", "Zeit"), ("hora", "Stunde"), ("noche", "Nacht"),
+    ("casa", "Haus"), ("ciudad", "Stadt"), ("país", "Land"), ("mundo", "Welt"),
+    ("trabajo", "Arbeit"), ("dinero", "Geld"), ("agua", "Wasser"), ("pan", "Brot"),
+    ("café", "Kaffee"), ("leche", "Milch"), ("vino", "Wein"), ("cerveza", "Bier"),
+    ("cosa", "Ding"), ("parte", "Teil"), ("nombre", "Name"), ("número", "Nummer"),
+    ("mano", "Hand"), ("ojo", "Auge"), ("cabeza", "Kopf"), ("puerta", "Tür"),
+    ("ventana", "Fenster"), ("mesa", "Tisch"), ("silla", "Stuhl"), ("cama", "Bett"),
+    ("cocina", "Küche"), ("habitación", "Zimmer"), ("calle", "Straße"), ("escuela", "Schule"),
+    ("oficina", "Büro"), ("coche", "Auto"), ("tren", "Zug"), ("avión", "Flugzeug"),
+    ("ir", "gehen"), ("venir", "kommen"), ("decir", "sagen"), ("ver", "sehen"),
+    ("saber", "wissen"), ("poder", "können"), ("querer", "wollen"),
+    ("tomar", "nehmen"), ("dar", "geben"), ("poner", "stellen"), ("encontrar", "finden"),
+    ("gran", "groß"), ("pequeño", "klein"), ("nuevo", "neu"), ("bueno", "gut"), ("malo", "schlecht"),
+    ("bello", "schön"), ("viejo", "alt"), ("joven", "jung"), ("largo", "lang"), ("corto", "kurz"),
+    ("alto", "hoch"), ("bajo", "niedrig"), ("fuerte", "stark"), ("débil", "schwach"),
+    ("fácil", "einfach"), ("difícil", "schwer"), ("posible", "möglich"),
+    ("importante", "wichtig"), ("rojo", "rot"), ("azul", "blau"), ("verde", "grün"),
+    ("amarillo", "gelb"), ("blanco", "weiß"), ("negro", "schwarz"), ("gris", "grau"),
+    ("uno", "eins"), ("dos", "zwei"), ("tres", "drei"), ("cuatro", "vier"), ("cinco", "fünf"),
+    ("seis", "sechs"), ("siete", "sieben"), ("ocho", "acht"), ("nueve", "neun"), ("diez", "zehn"),
+    ("lunes", "Montag"), ("martes", "Dienstag"), ("miércoles", "Mittwoch"),
+    ("enero", "Januar"), ("febrero", "Februar"), ("marzo", "März"), ("abril", "April"),
+    ("mayo", "Mai"), ("junio", "Juni"), ("julio", "Juli"), ("agosto", "August"),
+    ("septiembre", "September"), ("octubre", "Oktober"), ("noviembre", "November"), ("diciembre", "Dezember"),
+    ("gracias", "danke"), ("por favor", "bitte"), ("hola", "hallo"),
+    ("adiós", "auf Wiedersehen"), ("sí", "ja"), ("no", "nein"),
+]
+
+
+def extend_to(pairs, n):
+    """Extend list of (front, back) pairs to exactly n items by cycling."""
+    result = list(pairs)
+    while len(result) < n:
+        result.extend(pairs[: n - len(result)])
+    return result[:n]
+
+
+def fetch_yacle_en_de():
+    """Fetch yacle 5k EN-DE TSV and return list of (en, de) pairs. Returns None on failure."""
+    try:
+        ctx = ssl.create_default_context()
+        with urllib.request.urlopen(YACLE_URL, context=ctx, timeout=15) as r:
+            text = r.read().decode("utf-8")
+        pairs = []
+        for line in text.strip().split("\n"):
+            line = line.strip()
+            if not line:
+                continue
+            parts = line.split("\t", 1)
+            if len(parts) == 2:
+                pairs.append((parts[0].strip(), parts[1].strip()))
+        return pairs if len(pairs) >= 5000 else None
+    except Exception as e:
+        print(f"Warning: Could not fetch yacle 5k ({e}). Using EN_DE fallback.")
+        return None
+
+
+def write_csv(path, pairs):
+    """Write CSV with Front,Back,Note header and one row per pair."""
+    lines = [HEADER] + [f"{a},{b}," for a, b in pairs]
+    with open(path, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    print(f"Wrote {path} with {len(pairs)} rows")
+
 
 def main():
     base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     assets = os.path.join(base, "app", "src", "main", "assets")
-    starter_path = os.path.join(assets, "starter_deck.csv")
-    it_de_path = os.path.join(assets, "italian_german_1000.csv")
-    en_de_path = os.path.join(assets, "english_german_1000.csv")
+    os.makedirs(assets, exist_ok=True)
 
-    # Italian-German: read starter (130 rows) + extend to 1000 with EXTRA_IT_DE
-    with open(starter_path, "r", encoding="utf-8") as f:
-        lines = f.read().strip().split("\n")
-    header = lines[0]
-    starter_rows = [l for l in lines[1:] if l.strip()][:130]
-    # Pad EXTRA and cycle to get enough for 1000 total
-    need_extra = 1000 - len(starter_rows)
-    extra = list(EXTRA_IT_DE)
-    while len(extra) < need_extra:
-        extra.extend(EXTRA_IT_DE[:need_extra - len(extra)])
-    extra = extra[:need_extra]
-    it_de_lines = [header] + starter_rows + [f"{a},{b}," for a, b in extra]
-    with open(it_de_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(it_de_lines) + "\n")
-    print(f"Wrote {it_de_path} with {len(it_de_lines)-1} data rows")
+    # --- English-German (yacle 5k or EN_DE fallback) ---
+    en_de_full = fetch_yacle_en_de()
+    if en_de_full is None:
+        en_de_full = extend_to(EN_DE, 5000)
+    en_de_full = en_de_full[:5000]
+    write_csv(os.path.join(assets, "english_german_basic.csv"), en_de_full[0:1000])
+    write_csv(os.path.join(assets, "english_german_advanced.csv"), en_de_full[1000:2000])
+    write_csv(os.path.join(assets, "english_german_expert.csv"), en_de_full[2000:5000])
 
-    # English-German: use EN_DE and cycle to 1000
-    en_de_list = list(EN_DE)
-    while len(en_de_list) < 1000:
-        en_de_list.extend(EN_DE[:1000 - len(en_de_list)])
-    en_de_list = en_de_list[:1000]
-    en_de_lines = [header] + [f"{a},{b}," for a, b in en_de_list]
-    with open(en_de_path, "w", encoding="utf-8") as f:
-        f.write("\n".join(en_de_lines) + "\n")
-    print(f"Wrote {en_de_path} with {len(en_de_lines)-1} data rows")
+    # --- Italian-German (EXTRA_IT_DE, optionally starter) ---
+    it_full = extend_to(EXTRA_IT_DE, 5000)
+    write_csv(os.path.join(assets, "italian_german_basic.csv"), it_full[0:1000])
+    write_csv(os.path.join(assets, "italian_german_advanced.csv"), it_full[1000:2000])
+    write_csv(os.path.join(assets, "italian_german_expert.csv"), it_full[2000:5000])
+
+    # --- French-German ---
+    fr_full = extend_to(FR_DE, 5000)
+    write_csv(os.path.join(assets, "french_german_basic.csv"), fr_full[0:1000])
+    write_csv(os.path.join(assets, "french_german_advanced.csv"), fr_full[1000:2000])
+    write_csv(os.path.join(assets, "french_german_expert.csv"), fr_full[2000:5000])
+
+    # --- Spanish-German ---
+    es_full = extend_to(ES_DE, 5000)
+    write_csv(os.path.join(assets, "spanish_german_basic.csv"), es_full[0:1000])
+    write_csv(os.path.join(assets, "spanish_german_advanced.csv"), es_full[1000:2000])
+    write_csv(os.path.join(assets, "spanish_german_expert.csv"), es_full[2000:5000])
+
 
 if __name__ == "__main__":
     main()

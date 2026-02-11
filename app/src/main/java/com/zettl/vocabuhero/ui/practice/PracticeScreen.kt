@@ -10,11 +10,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -201,7 +207,7 @@ fun PracticeScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 1.dp)
                 ) {
-                    Text("Again", style = MaterialTheme.typography.titleSmall)
+                    Icon(Icons.Default.Close, contentDescription = "Again")
                 }
                 // Hard: tertiary (orange-ish) — "difficult"
                 Button(
@@ -211,7 +217,7 @@ fun PracticeScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 1.dp)
                 ) {
-                    Text("Hard", style = MaterialTheme.typography.titleSmall)
+                    Icon(Icons.Default.Refresh, contentDescription = "Hard")
                 }
                 // Good: primary (teal) — "correct, normal"
                 Button(
@@ -221,7 +227,7 @@ fun PracticeScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
                 ) {
-                    Text("Good", style = MaterialTheme.typography.titleSmall)
+                    Icon(Icons.Default.Check, contentDescription = "Good")
                 }
                 // Easy: secondary — "easy win"
                 Button(
@@ -231,7 +237,7 @@ fun PracticeScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 1.dp)
                 ) {
-                    Text("Easy", style = MaterialTheme.typography.titleSmall)
+                    Icon(Icons.Default.Star, contentDescription = "Easy")
                 }
             }
         }
