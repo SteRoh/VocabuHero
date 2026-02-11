@@ -13,7 +13,9 @@ import kotlinx.coroutines.launch
 
 data class SettingsUiState(
     val newCardsPerDay: Int = 10,
-    val cardContrast: Int = 0,
+    val cardContrast: Int = 100,
+    /** 0 = Theme, 1 = Light, 2 = Dark */
+    val cardBackground: Int = 0,
     val exportMessage: String? = null
 )
 
@@ -36,6 +38,11 @@ class SettingsViewModel(
                 _uiState.update { it.copy(cardContrast = value) }
             }
         }
+        viewModelScope.launch {
+            settingsStore.cardBackground.collect { value ->
+                _uiState.update { it.copy(cardBackground = value) }
+            }
+        }
     }
 
     fun setNewCardsPerDay(value: Int) {
@@ -44,8 +51,16 @@ class SettingsViewModel(
     }
 
     fun setCardContrast(value: Int) {
-        _uiState.update { it.copy(cardContrast = value) }
-        viewModelScope.launch { settingsStore.setCardContrast(value) }
+        _uiState.update { it.copy(cardContrast = value.coerceIn(0, 100)) }
+    }
+
+    fun persistCardContrast() {
+        viewModelScope.launch { settingsStore.setCardContrast(_uiState.value.cardContrast) }
+    }
+
+    fun setCardBackground(value: Int) {
+        _uiState.update { it.copy(cardBackground = value.coerceIn(0, 2)) }
+        viewModelScope.launch { settingsStore.setCardBackground(value) }
     }
 
     fun exportToCsv(context: android.content.Context, onDone: () -> Unit) {

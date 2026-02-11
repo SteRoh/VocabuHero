@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -47,7 +48,11 @@ fun DeckScreen(
         }
     }
 
-    Column(modifier = Modifier.padding(24.dp)) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp)
+    ) {
         uiState.deck?.let { deck ->
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -165,6 +170,7 @@ fun DeckScreen(
         }
 
         LazyColumn(
+            modifier = Modifier.weight(1f),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             items(uiState.cards, key = { it.id }) { card ->

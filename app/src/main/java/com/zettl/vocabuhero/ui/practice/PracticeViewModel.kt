@@ -19,7 +19,10 @@ data class PracticeUiState(
     val revealTime: Long = 0L,
     val sessionComplete: Boolean = false,
     val isLoading: Boolean = true,
-    val highContrastCard: Boolean = false
+    /** 0f = normal, 1f = high contrast; used to interpolate card colors */
+    val cardContrastLevel: Float = 1f,
+    /** 0 = Theme, 1 = Light, 2 = Dark card background */
+    val cardBackgroundPreset: Int = 0
 )
 
 class PracticeViewModel(
@@ -33,7 +36,12 @@ class PracticeViewModel(
     init {
         viewModelScope.launch {
             settingsStore.cardContrast.collect { value ->
-                _uiState.update { it.copy(highContrastCard = value == 1) }
+                _uiState.update { it.copy(cardContrastLevel = value / 100f) }
+            }
+        }
+        viewModelScope.launch {
+            settingsStore.cardBackground.collect { value ->
+                _uiState.update { it.copy(cardBackgroundPreset = value) }
             }
         }
     }

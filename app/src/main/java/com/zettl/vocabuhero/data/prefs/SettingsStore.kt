@@ -21,13 +21,20 @@ class SettingsStore(private val context: Context) {
     private val firstLaunchKey = longPreferencesKey("first_launch")
     private val currentDeckIdKey = longPreferencesKey("current_deck_id")
     private val cardContrastKey = intPreferencesKey("card_contrast")
+    private val cardBackgroundKey = intPreferencesKey("card_background")
 
     val newCardsPerDay: Flow<Int> = context.dataStore.data.map { it[newCardsPerDayKey] ?: 10 }
     val dailyReviewLimit: Flow<Int> = context.dataStore.data.map { it[dailyReviewLimitKey] ?: 100 }
     val streak: Flow<Int> = context.dataStore.data.map { it[streakKey] ?: 0 }
     val currentDeckId: Flow<Long?> = context.dataStore.data.map { it[currentDeckIdKey] }
-    /** 0 = Normal, 1 = High contrast for practice card */
-    val cardContrast: Flow<Int> = context.dataStore.data.map { it[cardContrastKey] ?: 0 }
+    /** 0 = Normal, 100 = High contrast for practice card (slider 0..100). Legacy: stored 1 is treated as 100. */
+    val cardContrast: Flow<Int> = context.dataStore.data.map { prefs ->
+        when (val v = prefs[cardContrastKey]) {
+            null -> 100
+            1 -> 100
+            else -> v.coerceIn(0, 100)
+        }
+    }
 
     suspend fun setNewCardsPerDay(value: Int) {
         context.dataStore.edit { it[newCardsPerDayKey] = value }
@@ -37,8 +44,15 @@ class SettingsStore(private val context: Context) {
         context.dataStore.edit { it[dailyReviewLimitKey] = value }
     }
 
+    /** 0 = Theme (contrast applies), 1 = Light, 2 = Dark */
+    val cardBackground: Flow<Int> = context.dataStore.data.map { it[cardBackgroundKey]?.coerceIn(0, 2) ?: 0 }
+
     suspend fun setCardContrast(value: Int) {
-        context.dataStore.edit { it[cardContrastKey] = value }
+        context.dataStore.edit { it[cardContrastKey] = value.coerceIn(0, 100) }
+    }
+
+    suspend fun setCardBackground(value: Int) {
+        context.dataStore.edit { it[cardBackgroundKey] = value.coerceIn(0, 2) }
     }
 
     suspend fun recordReviewDay() {

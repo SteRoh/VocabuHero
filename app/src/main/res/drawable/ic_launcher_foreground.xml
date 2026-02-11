@@ -4,16 +4,24 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Hero spark (diamond) above the V -->
+
+    <!-- Back card (darkest) -->
+    <path
+        android:fillColor="#55FFFFFF"
+        android:pathData="M38,38 L88,38 L88,82 L38,82 Z" />
+    <!-- Middle card -->
+    <path
+        android:fillColor="#AAFFFFFF"
+        android:pathData="M32,32 L82,32 L82,76 L32,76 Z" />
+    <!-- Front card -->
     <path
         android:fillColor="#FFFFFF"
-        android:pathData="M54,20 L57.5,30 L54,36 L50.5,30 Z" />
-    <!-- Bold V for VocabuHero - left leg -->
+        android:pathData="M26,26 L76,26 L76,70 L26,70 Z" />
+    <!-- Line on front card (suggests text / flashcard content) -->
     <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M32,32 L50,32 L54,76 L46,76 Z" />
-    <!-- Right leg -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M58,32 L76,32 L70,76 L62,76 Z" />
+        android:pathData="M34,44 L68,44 M34,52 L68,52 M34,60 L58,60"
+        android:strokeWidth="2"
+        android:strokeColor="#5B21B6"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000" />
 </vector>

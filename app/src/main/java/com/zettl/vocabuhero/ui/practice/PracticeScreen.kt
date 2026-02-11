@@ -10,6 +10,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
@@ -35,8 +37,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -121,10 +127,28 @@ fun PracticeScreen(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(bottom = 12.dp)
         )
-        val cardContainerColor = if (uiState.highContrastCard) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant
-        val cardContentColor = if (uiState.highContrastCard) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface
-        val cardSecondaryColor = if (uiState.highContrastCard) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f) else MaterialTheme.colorScheme.primary
-        val cardTertiaryColor = if (uiState.highContrastCard) MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f) else MaterialTheme.colorScheme.onSurfaceVariant
+        val t = uiState.cardContrastLevel
+        val bg = uiState.cardBackgroundPreset
+        val cardContainerColor = when (bg) {
+            1 -> MaterialTheme.colorScheme.surface
+            2 -> Color(0xFF1C1C1E)
+            else -> lerp(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.primaryContainer, t)
+        }
+        val cardContentColor = when (bg) {
+            1 -> MaterialTheme.colorScheme.onSurface
+            2 -> Color.White
+            else -> lerp(MaterialTheme.colorScheme.onSurface, MaterialTheme.colorScheme.onPrimaryContainer, t)
+        }
+        val cardSecondaryColor = when (bg) {
+            1 -> MaterialTheme.colorScheme.primary
+            2 -> Color.White.copy(alpha = 0.9f)
+            else -> lerp(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f), t)
+        }
+        val cardTertiaryColor = when (bg) {
+            1 -> MaterialTheme.colorScheme.onSurfaceVariant
+            2 -> Color.White.copy(alpha = 0.8f)
+            else -> lerp(MaterialTheme.colorScheme.onSurfaceVariant, MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f), t)
+        }
         Card(
             modifier = Modifier
                 .weight(1f)
@@ -157,11 +181,13 @@ fun PracticeScreen(
                     ) {
                         Text(
                             text = card.frontText,
-                            style = MaterialTheme.typography.displayLarge.copy(
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 42.sp
+                            style = MaterialTheme.typography.headlineLarge.copy(
+                                fontWeight = FontWeight.SemiBold
                             ),
-                            color = cardContentColor
+                            color = cardContentColor,
+                            maxLines = 3,
+                            overflow = TextOverflow.Ellipsis,
+                            textAlign = TextAlign.Center
                         )
                     }
                 } else {
@@ -173,18 +199,28 @@ fun PracticeScreen(
                             .padding(28.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .verticalScroll(rememberScrollState())
+                        ) {
                             Text(
                                 text = card.backText,
                                 style = MaterialTheme.typography.headlineMedium,
-                                color = cardSecondaryColor
+                                color = cardSecondaryColor,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis,
+                                textAlign = TextAlign.Center
                             )
                             card.note?.takeIf { it.isNotBlank() }?.let { note ->
                                 Text(
                                     text = note,
                                     style = MaterialTheme.typography.bodyMedium,
                                     modifier = Modifier.padding(top = 16.dp),
-                                    color = cardTertiaryColor
+                                    color = cardTertiaryColor,
+                                    textAlign = TextAlign.Center
                                 )
                             }
                         }
