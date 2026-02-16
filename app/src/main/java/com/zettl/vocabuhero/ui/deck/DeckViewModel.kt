@@ -54,6 +54,15 @@ class DeckViewModel(
         }
     }
 
+    fun setPracticeReversed(reversed: Boolean) {
+        viewModelScope.launch {
+            val deck = repository.getDeck(deckId) ?: return@launch
+            val updated = deck.copy(practiceReversed = reversed)
+            repository.updateDeck(updated)
+            _uiState.update { it.copy(deck = updated) }
+        }
+    }
+
     fun showResetProgressDialog(show: Boolean) {
         _uiState.update { it.copy(showResetProgressDialog = show) }
     }

@@ -20,6 +20,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -72,6 +73,27 @@ fun DeckScreen(
                         color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f),
                         modifier = Modifier.padding(top = 6.dp)
                     )
+                    Text(
+                        "Practice direction",
+                        style = MaterialTheme.typography.titleSmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f),
+                        modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
+                    )
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        FilterChip(
+                            selected = !deck.practiceReversed,
+                            onClick = { viewModel.setPracticeReversed(false) },
+                            label = { Text("${deck.frontLang} → ${deck.backLang}") }
+                        )
+                        FilterChip(
+                            selected = deck.practiceReversed,
+                            onClick = { viewModel.setPracticeReversed(true) },
+                            label = { Text("${deck.backLang} → ${deck.frontLang}") }
+                        )
+                    }
                     if (!uiState.isCurrentDeck) {
                         Button(
                             onClick = { viewModel.setAsCurrentDeck() },

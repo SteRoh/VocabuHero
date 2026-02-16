@@ -10,5 +10,6 @@ data class DeckEntity(
     val name: String,
     val frontLang: String,
     val backLang: String,
+    val practiceReversed: Boolean = false,
     val createdAt: Long = System.currentTimeMillis()
 )

@@ -22,7 +22,8 @@ data class PracticeUiState(
     /** 0f = normal, 1f = high contrast; used to interpolate card colors */
     val cardContrastLevel: Float = 1f,
     /** 0 = Theme, 1 = Light, 2 = Dark card background */
-    val cardBackgroundPreset: Int = 0
+    val cardBackgroundPreset: Int = 0,
+    val reversed: Boolean = false
 )
 
 class PracticeViewModel(
@@ -50,6 +51,7 @@ class PracticeViewModel(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true) }
             val deckId = repository.currentDeckId.first()
+            val deck = if (deckId != null) repository.getDeck(deckId) else null
             val list = if (deckId != null) repository.getSessionCards(deckId) else emptyList()
             _uiState.update {
                 it.copy(
@@ -57,7 +59,8 @@ class PracticeViewModel(
                     currentIndex = 0,
                     isRevealed = false,
                     sessionComplete = list.isEmpty(),
-                    isLoading = false
+                    isLoading = false,
+                    reversed = deck?.practiceReversed ?: false
                 )
             }
         }

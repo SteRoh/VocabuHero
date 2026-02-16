@@ -41,6 +41,10 @@ class CardRepository(
         deckDao.insert(DeckEntity(name = name, frontLang = frontLang, backLang = backLang))
     }
 
+    suspend fun updateDeck(deck: DeckEntity) = withContext(Dispatchers.IO) {
+        deckDao.update(deck)
+    }
+
     suspend fun setCurrentDeckId(id: Long?) = withContext(Dispatchers.IO) {
         settingsStore.setCurrentDeckId(id)
     }

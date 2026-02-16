@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -170,9 +171,11 @@ fun PracticeScreen(
                         clip = true
                     }
             ) {
-                // Compose only the visible side — front = word to learn, back = translation
+                // Compose only the visible side — front = prompt, back = answer (swap when reversed)
+                val promptText = if (uiState.reversed) card.backText else card.frontText
+                val answerText = if (uiState.reversed) card.frontText else card.backText
                 if (rotation < 90f) {
-                    // Front: only the word to learn, nothing else
+                    // Front: only the prompt (word to learn), nothing else
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -180,7 +183,7 @@ fun PracticeScreen(
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = card.frontText,
+                            text = promptText,
                             style = MaterialTheme.typography.headlineLarge.copy(
                                 fontWeight = FontWeight.SemiBold
                             ),
@@ -191,7 +194,7 @@ fun PracticeScreen(
                         )
                     }
                 } else {
-                    // Back: translation (and note), rotated so it appears right-side up when card is flipped
+                    // Back: answer (and note), rotated so it appears right-side up when card is flipped
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -207,7 +210,7 @@ fun PracticeScreen(
                                 .verticalScroll(rememberScrollState())
                         ) {
                             Text(
-                                text = card.backText,
+                                text = answerText,
                                 style = MaterialTheme.typography.headlineMedium,
                                 color = cardSecondaryColor,
                                 maxLines = 2,
@@ -238,7 +241,7 @@ fun PracticeScreen(
                 // Again: error/destructive (red) — "wrong"
                 Button(
                     onClick = { viewModel.rate(0) },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).height(56.dp),
                     shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 1.dp)
@@ -248,7 +251,7 @@ fun PracticeScreen(
                 // Hard: tertiary (orange-ish) — "difficult"
                 Button(
                     onClick = { viewModel.rate(1) },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).height(56.dp),
                     shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.tertiary),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 1.dp)
@@ -258,7 +261,7 @@ fun PracticeScreen(
                 // Good: primary (teal) — "correct, normal"
                 Button(
                     onClick = { viewModel.rate(2) },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).height(56.dp),
                     shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 2.dp)
@@ -268,7 +271,7 @@ fun PracticeScreen(
                 // Easy: secondary — "easy win"
                 Button(
                     onClick = { viewModel.rate(3) },
-                    modifier = Modifier.weight(1f),
+                    modifier = Modifier.weight(1f).height(56.dp),
                     shape = MaterialTheme.shapes.medium,
                     colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
                     elevation = ButtonDefaults.buttonElevation(defaultElevation = 1.dp)
