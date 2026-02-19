@@ -21,16 +21,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun SettingsScreen(
-    viewModel: SettingsViewModel,
-    onExportDone: () -> Unit
-) {
+fun SettingsScreen(viewModel: SettingsViewModel) {
     val uiState by viewModel.uiState.collectAsState()
-    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -116,22 +111,6 @@ fun SettingsScreen(
                     )
                 }
             }
-        }
-        Button(
-            onClick = { viewModel.exportToCsv(context, onExportDone) },
-            modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
-            shape = MaterialTheme.shapes.medium,
-            elevation = ButtonDefaults.buttonElevation(defaultElevation = 1.dp)
-        ) {
-            Text("Export / Backup to CSV", style = MaterialTheme.typography.labelLarge)
-        }
-        uiState.exportMessage?.let { msg ->
-            Text(
-                msg,
-                modifier = Modifier.padding(top = 12.dp),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
     }
 }

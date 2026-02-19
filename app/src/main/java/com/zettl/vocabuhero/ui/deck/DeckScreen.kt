@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.zettl.vocabuhero.data.db.CardEntity
 
@@ -38,9 +39,11 @@ import com.zettl.vocabuhero.data.db.CardEntity
 fun DeckScreen(
     viewModel: DeckViewModel,
     onCardClick: (Long) -> Unit,
-    onAddCard: () -> Unit
+    onAddCard: () -> Unit,
+    onImport: () -> Unit
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val context = LocalContext.current
 
     androidx.compose.runtime.LaunchedEffect(uiState.navigateToAddCard) {
         if (uiState.navigateToAddCard) {
@@ -137,6 +140,37 @@ fun DeckScreen(
                         Text(
                             "Reset progress",
                             style = MaterialTheme.typography.titleMedium
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        OutlinedButton(
+                            onClick = { viewModel.exportToCsv(context) },
+                            modifier = Modifier.weight(1f),
+                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
+                            shape = MaterialTheme.shapes.medium
+                        ) {
+                            Text("Export CSV", style = MaterialTheme.typography.labelLarge)
+                        }
+                        OutlinedButton(
+                            onClick = { viewModel.prepareImport(onImport) },
+                            modifier = Modifier.weight(1f),
+                            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 12.dp),
+                            shape = MaterialTheme.shapes.medium
+                        ) {
+                            Text("Import CSV", style = MaterialTheme.typography.labelLarge)
+                        }
+                    }
+                    uiState.exportMessage?.let { msg ->
+                        Text(
+                            msg,
+                            modifier = Modifier.padding(top = 12.dp),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f)
                         )
                     }
                 }

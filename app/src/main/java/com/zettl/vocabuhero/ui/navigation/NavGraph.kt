@@ -93,10 +93,7 @@ fun VocabuHeroNavGraph(
         }
         composable(NavRoutes.Settings) {
             val vm = viewModel<SettingsViewModel>(factory = factory)
-            SettingsScreen(
-                viewModel = vm,
-                onExportDone = { }
-            )
+            SettingsScreen(viewModel = vm)
         }
         composable(
             route = NavRoutes.DeckDetail,
@@ -115,7 +112,8 @@ fun VocabuHeroNavGraph(
             DeckScreen(
                 viewModel = vm,
                 onCardClick = { id -> navController.navigate(NavRoutes.edit(id)) },
-                onAddCard = { navController.navigate(NavRoutes.EditNew) }
+                onAddCard = { navController.navigate(NavRoutes.EditNew) },
+                onImport = { navController.navigate(NavRoutes.Import) }
             )
         }
         composable(NavRoutes.DeckList) {

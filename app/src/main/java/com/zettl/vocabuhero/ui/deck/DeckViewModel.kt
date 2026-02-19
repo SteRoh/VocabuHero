@@ -11,13 +11,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
+private fun escapeCsv(s: String) = "\"${s.replace("\"", "\"\"")}\""
+
 data class DeckUiState(
     val deck: DeckEntity? = null,
     val cards: List<CardEntity> = emptyList(),
     val isCurrentDeck: Boolean = false,
     val showResetProgressDialog: Boolean = false,
     val navigateToAddCard: Boolean = false,
-    val cardToDelete: CardEntity? = null
+    val cardToDelete: CardEntity? = null,
+    val exportMessage: String? = null
 )
 
 class DeckViewModel(
@@ -95,5 +98,30 @@ class DeckViewModel(
             repository.deleteCard(card)
             _uiState.update { it.copy(cardToDelete = null) }
         }
+    }
+
+    /** Sets this deck as current, then invokes callback (e.g. navigate to Import). */
+    fun prepareImport(onNavigate: () -> Unit) {
+        viewModelScope.launch {
+            repository.setCurrentDeckId(deckId)
+            onNavigate()
+        }
+    }
+
+    fun exportToCsv(context: android.content.Context) {
+        viewModelScope.launch {
+            val cards = repository.getAllCardsOnce(deckId)
+            val csv = "Front,Back,Note\n" + cards.joinToString("\n") { c ->
+                "${escapeCsv(c.frontText)},${escapeCsv(c.backText)},${escapeCsv(c.note ?: "")}"
+            }
+            val dir = context.getExternalFilesDir(null) ?: return@launch
+            val file = java.io.File(dir, "vocabuhero_export_${System.currentTimeMillis()}.csv")
+            file.writeText(csv)
+            _uiState.update { it.copy(exportMessage = "Exported to ${file.absolutePath}") }
+        }
+    }
+
+    fun clearExportMessage() {
+        _uiState.update { it.copy(exportMessage = null) }
     }
 }
