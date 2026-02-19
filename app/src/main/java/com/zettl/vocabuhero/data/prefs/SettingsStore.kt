@@ -44,15 +44,15 @@ class SettingsStore(private val context: Context) {
         context.dataStore.edit { it[dailyReviewLimitKey] = value }
     }
 
-    /** 0 = Theme (contrast applies), 1 = Light, 2 = Dark */
-    val cardBackground: Flow<Int> = context.dataStore.data.map { it[cardBackgroundKey]?.coerceIn(0, 2) ?: 0 }
+    /** 0 = Theme, 1 = Light, 2 = Dark, 3–7 = Ocean/Sunset/Aurora/Mint/Slate */
+    val cardBackground: Flow<Int> = context.dataStore.data.map { it[cardBackgroundKey]?.coerceIn(0, 7) ?: 0 }
 
     suspend fun setCardContrast(value: Int) {
         context.dataStore.edit { it[cardContrastKey] = value.coerceIn(0, 100) }
     }
 
     suspend fun setCardBackground(value: Int) {
-        context.dataStore.edit { it[cardBackgroundKey] = value.coerceIn(0, 2) }
+        context.dataStore.edit { it[cardBackgroundKey] = value.coerceIn(0, 7) }
     }
 
     suspend fun recordReviewDay() {

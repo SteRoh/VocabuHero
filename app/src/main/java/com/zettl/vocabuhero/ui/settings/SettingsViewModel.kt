@@ -57,7 +57,7 @@ class SettingsViewModel(
     }
 
     fun setCardBackground(value: Int) {
-        _uiState.update { it.copy(cardBackground = value.coerceIn(0, 2)) }
+        _uiState.update { it.copy(cardBackground = value.coerceIn(0, 7)) }
         viewModelScope.launch { settingsStore.setCardBackground(value) }
     }
 }

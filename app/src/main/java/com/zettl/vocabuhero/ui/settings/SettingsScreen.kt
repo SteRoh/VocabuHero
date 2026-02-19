@@ -1,27 +1,33 @@
 package com.zettl.vocabuhero.ui.settings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Slider
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import com.zettl.vocabuhero.ui.theme.CardBackgrounds
 
 @Composable
 fun SettingsScreen(viewModel: SettingsViewModel) {
@@ -88,27 +94,65 @@ fun SettingsScreen(viewModel: SettingsViewModel) {
                     "Card background",
                     style = MaterialTheme.typography.titleSmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 4.dp)
+                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
                 )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    FilterChip(
-                        selected = uiState.cardBackground == 0,
-                        onClick = { viewModel.setCardBackground(0) },
-                        label = { Text("Theme") }
-                    )
-                    FilterChip(
-                        selected = uiState.cardBackground == 1,
-                        onClick = { viewModel.setCardBackground(1) },
-                        label = { Text("Light") }
-                    )
-                    FilterChip(
-                        selected = uiState.cardBackground == 2,
-                        onClick = { viewModel.setCardBackground(2) },
-                        label = { Text("Dark") }
-                    )
+                val scheme = MaterialTheme.colorScheme
+                val presets = CardBackgrounds.allPresets(
+                    scheme.surfaceVariant,
+                    scheme.primaryContainer,
+                    scheme.onSurface,
+                    scheme.onPrimaryContainer,
+                    scheme.primary,
+                    scheme.surface,
+                    scheme.onSurfaceVariant
+                )
+                Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+                    listOf(presets.take(4), presets.drop(4)).forEach { rowPresets ->
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            rowPresets.forEach { preset ->
+                                val selected = uiState.cardBackground == preset.id
+                                Card(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .clip(MaterialTheme.shapes.small)
+                                        .clickable { viewModel.setCardBackground(preset.id) }
+                                        .then(
+                                            if (selected) Modifier.border(
+                                                2.dp,
+                                                MaterialTheme.colorScheme.primary,
+                                                MaterialTheme.shapes.small
+                                            )
+                                            else Modifier
+                                        ),
+                                    colors = CardDefaults.cardColors(
+                                        containerColor = MaterialTheme.colorScheme.surface
+                                    ),
+                                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+                                ) {
+                                    Column(
+                                        modifier = Modifier.padding(8.dp),
+                                        horizontalAlignment = Alignment.CenterHorizontally
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(36.dp)
+                                                .clip(CircleShape)
+                                                .background(preset.previewColor)
+                                        )
+                                        Text(
+                                            text = preset.displayName,
+                                            style = MaterialTheme.typography.labelSmall,
+                                            color = MaterialTheme.colorScheme.onSurface,
+                                            modifier = Modifier.padding(top = 4.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             }
         }

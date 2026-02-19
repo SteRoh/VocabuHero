@@ -40,6 +40,8 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.foundation.background
+import com.zettl.vocabuhero.ui.theme.CardBackgrounds
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -130,26 +132,36 @@ fun PracticeScreen(
         )
         val t = uiState.cardContrastLevel
         val bg = uiState.cardBackgroundPreset
-        val cardContainerColor = when (bg) {
-            1 -> MaterialTheme.colorScheme.surface
-            2 -> Color(0xFF1C1C1E)
-            else -> lerp(MaterialTheme.colorScheme.surfaceVariant, MaterialTheme.colorScheme.primaryContainer, t)
+        val scheme = MaterialTheme.colorScheme
+        val preset = CardBackgrounds.preset(
+            bg,
+            scheme.surfaceVariant,
+            scheme.primaryContainer,
+            scheme.onSurface,
+            scheme.onPrimaryContainer,
+            scheme.primary,
+            scheme.surface,
+            scheme.onSurfaceVariant
+        )
+        val isThemeBased = bg == 0
+        val cardContainerColor = when {
+            isThemeBased -> lerp(scheme.surfaceVariant, scheme.primaryContainer, t)
+            preset?.isGradient == true -> Color.Transparent
+            else -> preset!!.containerColor!!
         }
-        val cardContentColor = when (bg) {
-            1 -> MaterialTheme.colorScheme.onSurface
-            2 -> Color.White
-            else -> lerp(MaterialTheme.colorScheme.onSurface, MaterialTheme.colorScheme.onPrimaryContainer, t)
+        val cardContentColor = when {
+            isThemeBased -> lerp(scheme.onSurface, scheme.onPrimaryContainer, t)
+            else -> preset!!.contentColor
         }
-        val cardSecondaryColor = when (bg) {
-            1 -> MaterialTheme.colorScheme.primary
-            2 -> Color.White.copy(alpha = 0.9f)
-            else -> lerp(MaterialTheme.colorScheme.primary, MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.9f), t)
+        val cardSecondaryColor = when {
+            isThemeBased -> lerp(scheme.primary, scheme.onPrimaryContainer.copy(alpha = 0.9f), t)
+            else -> preset!!.secondaryColor
         }
-        val cardTertiaryColor = when (bg) {
-            1 -> MaterialTheme.colorScheme.onSurfaceVariant
-            2 -> Color.White.copy(alpha = 0.8f)
-            else -> lerp(MaterialTheme.colorScheme.onSurfaceVariant, MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f), t)
+        val cardTertiaryColor = when {
+            isThemeBased -> lerp(scheme.onSurfaceVariant, scheme.onPrimaryContainer.copy(alpha = 0.8f), t)
+            else -> preset!!.tertiaryColor
         }
+        val gradientBrush = preset?.gradientBrush
         Card(
             modifier = Modifier
                 .weight(1f)
@@ -164,6 +176,10 @@ fun PracticeScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .clip(MaterialTheme.shapes.large)
+                    .then(
+                        if (gradientBrush != null) Modifier.background(gradientBrush)
+                        else Modifier
+                    )
                     .graphicsLayer {
                         rotationY = rotation
                         transformOrigin = TransformOrigin.Center
