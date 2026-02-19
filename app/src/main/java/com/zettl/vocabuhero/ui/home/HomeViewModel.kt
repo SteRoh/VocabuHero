@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 data class HomeUiState(
     val total: Int = 0,
     val dueToday: Int = 0,
-    val newCount: Int = 0,
+    val learned: Int = 0,
     val streak: Int = 0,
     val currentDeckId: Long? = null,
     val currentDeckName: String? = null
@@ -56,7 +56,7 @@ class HomeViewModel(private val repository: CardRepository) : ViewModel() {
                 it.copy(
                     total = repository.getTotalCountOnce(deckId),
                     dueToday = repository.countDue(deckId, dayStart, dayEnd),
-                    newCount = repository.countNew(deckId)
+                    learned = repository.countLearned(deckId)
                 )
             }
         }

@@ -1,12 +1,15 @@
 package com.zettl.vocabuhero.data.db
 
 import androidx.room.Dao
+import androidx.room.Query
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
-import androidx.room.Query
 import androidx.room.Update
 import kotlinx.coroutines.flow.Flow
+
+/** Result of COUNT GROUP BY srsLevel for SRS bucket visualization. */
+data class SrsLevelCount(val srsLevel: Int, val count: Int)
 
 @Dao
 interface CardDao {
@@ -61,4 +64,10 @@ interface CardDao {
 
     @Query("UPDATE cards SET srsLevel = 0, lastReviewed = NULL, nextReview = NULL, easiness = NULL WHERE deckId = :deckId")
     suspend fun resetProgressInDeck(deckId: Long)
+
+    @Query("SELECT COUNT(*) FROM cards WHERE deckId = :deckId AND srsLevel = 0 AND nextReview IS NOT NULL")
+    suspend fun countLearning(deckId: Long): Int
+
+    @Query("SELECT srsLevel, COUNT(*) as count FROM cards WHERE deckId = :deckId AND srsLevel > 0 GROUP BY srsLevel ORDER BY srsLevel")
+    suspend fun getSrsLevelCounts(deckId: Long): List<SrsLevelCount>
 }

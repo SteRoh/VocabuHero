@@ -18,7 +18,8 @@ data class StatsUiState(
     val accuracyPercent: Float = 0f,
     val streak: Int = 0,
     val avgResponseTimeMs: Long? = null,
-    val retentionEstimate: Float = 0f
+    val retentionEstimate: Float = 0f,
+    val srsBuckets: List<Pair<String, Int>> = emptyList()
 )
 
 class StatsViewModel(private val repository: CardRepository) : ViewModel() {
@@ -42,6 +43,7 @@ class StatsViewModel(private val repository: CardRepository) : ViewModel() {
             val streak = repository.streak.first()
             val avgTime = repository.getAverageResponseTimeMs(deckId)
             val retention = if (total > 0) learned * 100f / total else 0f
+            val buckets = repository.getSrsBuckets(deckId)
             _uiState.update {
                 it.copy(
                     total = total,
@@ -50,7 +52,8 @@ class StatsViewModel(private val repository: CardRepository) : ViewModel() {
                     accuracyPercent = accuracy,
                     streak = streak,
                     avgResponseTimeMs = avgTime,
-                    retentionEstimate = retention
+                    retentionEstimate = retention,
+                    srsBuckets = buckets
                 )
             }
         }

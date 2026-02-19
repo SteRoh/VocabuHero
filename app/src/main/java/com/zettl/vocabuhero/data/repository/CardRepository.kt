@@ -4,6 +4,7 @@ import android.content.Context
 import com.zettl.vocabuhero.data.csv.CsvParser
 import com.zettl.vocabuhero.data.db.CardEntity
 import com.zettl.vocabuhero.data.db.CardDao
+import com.zettl.vocabuhero.data.db.SrsLevelCount
 import com.zettl.vocabuhero.data.db.DeckDao
 import com.zettl.vocabuhero.data.db.DeckEntity
 import com.zettl.vocabuhero.data.db.ReviewLogDao
@@ -114,6 +115,22 @@ class CardRepository(
 
     suspend fun countLearned(deckId: Long): Int = withContext(Dispatchers.IO) {
         cardDao.countLearned(deckId)
+    }
+
+    /** SRS bucket labels by level: Good path 1→3→7→30d, Easy 1→7→30d. Level 0 split into New/Learning. */
+    suspend fun getSrsBuckets(deckId: Long): List<Pair<String, Int>> = withContext(Dispatchers.IO) {
+        val new = cardDao.countNew(deckId)
+        val learning = cardDao.countLearning(deckId)
+        val levelCounts = cardDao.getSrsLevelCounts(deckId).associate { it.srsLevel to it.count }
+        val labels = mapOf(1 to "1d", 2 to "3d", 3 to "7d", 4 to "30d")
+        buildList {
+            add("New" to new)
+            add("Learning" to learning)
+            for (level in 1..4) {
+                val count = levelCounts[level] ?: 0
+                add(labels[level]!! to count)
+            }
+        }
     }
 
     suspend fun isFirstLaunch(): Boolean = settingsStore.isFirstLaunch()

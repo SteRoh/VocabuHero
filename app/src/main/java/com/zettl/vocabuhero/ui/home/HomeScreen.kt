@@ -1,9 +1,11 @@
 package com.zettl.vocabuhero.ui.home
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -131,7 +133,7 @@ fun HomeScreen(
             ) {
                 StatItem(
                     value = "${uiState.dueToday}",
-                    label = "To review",
+                    label = "Ready",
                     modifier = Modifier.weight(1f)
                 )
                 VerticalDivider(
@@ -139,19 +141,51 @@ fun HomeScreen(
                     modifier = Modifier.fillMaxHeight()
                 )
                 StatItem(
-                    value = "${uiState.newCount}",
-                    label = "New",
+                    value = if (uiState.total > 0) "${uiState.learned} of ${uiState.total}" else "—",
+                    label = "Learned",
                     modifier = Modifier.weight(1f)
                 )
-                VerticalDivider(
-                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.25f),
-                    modifier = Modifier.fillMaxHeight()
-                )
-                StatItem(
-                    value = "${uiState.total}",
-                    label = "Total",
-                    modifier = Modifier.weight(1f)
-                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        // Progress: cards left to learn
+        if (uiState.total > 0) {
+            val leftToLearn = uiState.total - uiState.learned
+            val progress = uiState.learned.toFloat() / uiState.total
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text(
+                        text = "$leftToLearn left to learn",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Text(
+                        text = "${(progress * 100).toInt()}%",
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Spacer(modifier = Modifier.height(6.dp))
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(8.dp)
+                        .clip(MaterialTheme.shapes.small)
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth(progress)
+                            .height(8.dp)
+                            .clip(MaterialTheme.shapes.small)
+                            .background(MaterialTheme.colorScheme.primary)
+                    )
+                }
             }
         }
 
